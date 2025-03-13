@@ -19,11 +19,11 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.0.1"
+    "@modelcontextprotocol/sdk": "^1.7.0"
   },
   "devDependencies": {
     "@types/node": "^22",
     "shx": "^0.3.4",
-    "typescript": "^5.6.2"
+    "typescript": "^5.8.2"
   }
 }

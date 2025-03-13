@@ -50,3 +50,5 @@ Desktop.ini
 *.tsv
 *.jsonl
 :
+
+**/dist
