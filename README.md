@@ -4,7 +4,6 @@ An MCP server implementation that integrates the Sonar API to provide Claude wit
 
 ![Demo](perplexity-ask/assets/demo_screenshot.png)
 
-
 ## Tools
 
 - **perplexity_ask**
@@ -17,7 +16,7 @@ An MCP server implementation that integrates the Sonar API to provide Claude wit
 
 ## Configuration
 
-### Step 1: 
+### Step 1
 
 Clone the MCP repository:
 
@@ -39,7 +38,7 @@ cd servers/src/perplexity-ask && npm install
 
 ### Step 3: Configure Claude Desktop
 
-1. Download Claude desktop [here](https://claude.ai/download). 
+1. Download Claude desktop [here](https://claude.ai/download).
 
 2. Add this to your `claude_desktop_config.json`:
 
@@ -54,15 +53,20 @@ cd servers/src/perplexity-ask && npm install
         "--rm",
         "-e",
         "PERPLEXITY_API_KEY",
+        "-e",
+        "PERPLEXITY_MODEL",
         "mcp/perplexity-ask"
       ],
       "env": {
-        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE"
+        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE",
+        "PERPLEXITY_MODEL": "sonar-pro"
       }
     }
   }
 }
 ```
+
+You can specify which Perplexity model to use by setting the `PERPLEXITY_MODEL` environment variable. If not specified, it defaults to "sonar-pro".
 
 ### NPX
 
@@ -72,11 +76,11 @@ cd servers/src/perplexity-ask && npm install
     "perplexity-ask": {
       "command": "npx",
       "args": [
-        "-y",
-        "@modelcontextprotocol/server-perplexity-ask"
+        "npx ~/your-repo-path/perplexity/perplexity-ask"
       ],
       "env": {
-        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE"
+        "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE",
+        "PERPLEXITY_MODEL": "sonar-pro"
       }
     }
   }
@@ -99,7 +103,7 @@ docker build -t mcp/perplexity-ask:latest -f src/perplexity-ask/Dockerfile .
 
 ### Step 5: Testing
 
-Let’s make sure Claude for Desktop is picking up the two tools we’ve exposed in our `perplexity-ask` server. You can do this by looking for the hammer icon:
+Let's make sure Claude for Desktop is picking up the two tools we've exposed in our `perplexity-ask` server. You can do this by looking for the hammer icon:
 
 ![Claude Visual Tools](perplexity-ask/assets/visual-indicator-mcp-tools.png)
 
@@ -113,13 +117,25 @@ If you see both of these this means that the integration is active. Congratulati
 
 Currently, the search parameters used are the default ones. You can modify any search parameter in the API call directly in the `index.ts` script. For this, please refer to the official [API documentation](https://docs.perplexity.ai/api-reference/chat-completions).
 
-### Troubleshooting 
+### Troubleshooting
 
-The Claude documentation provides an excellent [troubleshooting guide](https://modelcontextprotocol.io/docs/tools/debugging) you can refer to. However, you can still reach out to us at api@perplexity.ai for any additional support or [file a bug](https://github.com/ppl-ai/api-discussion/issues). 
+The Claude documentation provides an excellent [troubleshooting guide](https://modelcontextprotocol.io/docs/tools/debugging) you can refer to. However, you can still reach out to us at <api@perplexity.ai> for any additional support or [file a bug](https://github.com/ppl-ai/api-discussion/issues).
 
+## Logging and Debugging
+
+The perplexity-ask tool includes comprehensive logging and error handling to improve reliability and debuggability:
+
+- Log files are stored in `mcp-server.log` at the repository root
+- Logs include detailed information about:
+  - API requests and responses
+  - Tool call processing
+  - Errors (network errors, JSON parsing errors, API errors)
+  - General operation information
+- Log rotation is implemented to prevent excessive disk usage (maximum size: 20MB)
+- When the log file reaches the size limit, it's automatically truncated to preserve the most recent logs
+
+These logging capabilities make it easier to identify and resolve issues when using the perplexity-ask tool. When reporting problems, including relevant log entries can help with faster resolution.
 
 ## License
 
 This MCP server is licensed under the MIT License. This means you are free to use, modify, and distribute the software, subject to the terms and conditions of the MIT License. For more details, please see the LICENSE file in the project repository.
-
-
