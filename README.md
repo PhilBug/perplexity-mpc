@@ -14,6 +14,14 @@ An MCP server implementation that integrates the Sonar API to provide Claude wit
         - `role` (string): The role of the message (e.g., `system`, `user`, `assistant`).
         - `content` (string): The content of the message.
 
+- **perplexity_reason**
+  - Perform reasoning tasks using the Perplexity API with the sonar-reasoning-pro model.
+  - **Inputs:**
+    - `messages` (array): An array of conversation messages.
+      - Each message must include:
+        - `role` (string): The role of the message (e.g., `system`, `user`, `assistant`).
+        - `content` (string): The content of the message.
+
 ## Configuration
 
 ### Step 1
@@ -55,11 +63,14 @@ cd servers/src/perplexity-ask && npm install
         "PERPLEXITY_API_KEY",
         "-e",
         "PERPLEXITY_MODEL",
+        "-e",
+        "PERPLEXITY_REASONING_MODEL",
         "mcp/perplexity-ask"
       ],
       "env": {
         "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE",
-        "PERPLEXITY_MODEL": "sonar-pro"
+        "PERPLEXITY_MODEL": "sonar-pro",
+        "PERPLEXITY_REASONING_MODEL": "sonar-reasoning-pro"
       }
     }
   }
@@ -67,6 +78,7 @@ cd servers/src/perplexity-ask && npm install
 ```
 
 You can specify which Perplexity model to use by setting the `PERPLEXITY_MODEL` environment variable. If not specified, it defaults to "sonar-pro".
+You can also specify which Perplexity reasoning model to use by setting the `PERPLEXITY_REASONING_MODEL` environment variable. If not specified, it defaults to "sonar-reasoning-pro".
 
 ### NPX
 
@@ -80,7 +92,8 @@ You can specify which Perplexity model to use by setting the `PERPLEXITY_MODEL` 
       ],
       "env": {
         "PERPLEXITY_API_KEY": "YOUR_API_KEY_HERE",
-        "PERPLEXITY_MODEL": "sonar-pro"
+        "PERPLEXITY_MODEL": "sonar-pro",
+        "PERPLEXITY_REASONING_MODEL": "sonar-reasoning-pro"
       }
     }
   }
