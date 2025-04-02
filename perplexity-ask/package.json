@@ -19,11 +19,12 @@
     "watch": "tsc --watch"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.7.0"
+    "@modelcontextprotocol/sdk": "^1.8.0"
   },
   "devDependencies": {
     "@types/node": "^22",
-    "shx": "^0.3.4",
+    "shx": "^0.4.0",
     "typescript": "^5.8.2"
-  }
+  },
+  "packageManager": "yarn@4.8.1"
 }

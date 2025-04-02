@@ -147,6 +147,42 @@ const PERPLEXITY_ASK_TOOL: Tool = {
   },
 };
 
+/**
+ * Definition of the Perplexity Reason Tool.
+ * This tool performs reasoning queries using the Perplexity API.
+ */
+const PERPLEXITY_REASON_TOOL: Tool = {
+  name: "perplexity_reason",
+  description:
+    "Performs reasoning tasks using the Perplexity API. " +
+    "Accepts an array of messages (each with a role and content) " +
+    "and returns a well-reasoned response using the sonar-reasoning-pro model.",
+  inputSchema: {
+    type: "object",
+    properties: {
+      messages: {
+        type: "array",
+        items: {
+          type: "object",
+          properties: {
+            role: {
+              type: "string",
+              description: "Role of the message (e.g., system, user, assistant)",
+            },
+            content: {
+              type: "string",
+              description: "The content of the message",
+            },
+          },
+          required: ["role", "content"],
+        },
+        description: "Array of conversation messages",
+      },
+    },
+    required: ["messages"],
+  },
+};
+
 // Retrieve the Perplexity API key from environment variables
 const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 if (!PERPLEXITY_API_KEY) {
@@ -158,21 +194,27 @@ if (!PERPLEXITY_API_KEY) {
 const PERPLEXITY_MODEL = process.env.PERPLEXITY_MODEL || "sonar-pro";
 logger.info(`Using Perplexity model: ${PERPLEXITY_MODEL}`);
 
+// Retrieve the reasoning model name from environment variables, defaulting to "sonar-reasoning-pro" if not set
+const PERPLEXITY_REASONING_MODEL = process.env.PERPLEXITY_REASONING_MODEL || "sonar-reasoning-pro";
+logger.info(`Using Perplexity reasoning model: ${PERPLEXITY_REASONING_MODEL}`);
+
 /**
  * Performs a chat completion by sending a request to the Perplexity API.
  * Appends citations to the returned message content if they exist.
  *
  * @param {Array<{ role: string; content: string }>} messages - An array of message objects.
+ * @param {string} [model] - Optional model to use for the completion. Defaults to the value from environment variable.
  * @returns {Promise<string>} The chat completion result with appended citations.
  * @throws Will throw an error if the API request fails.
  */
 async function performChatCompletion(
-  messages: Array<{ role: string; content: string }>
+  messages: Array<{ role: string; content: string }>,
+  model: string = PERPLEXITY_MODEL
 ): Promise<string> {
   // Construct the API endpoint URL and request body
   const url = new URL("https://api.perplexity.ai/chat/completions");
   const body = {
-    model: PERPLEXITY_MODEL, // Use the model from environment variable
+    model: model, // Use the specified model or default from environment variable
     messages: messages,
     // Additional parameters can be added here if required (e.g., max_tokens, temperature, etc.)
     // See the Sonar API documentation for more details:
@@ -182,7 +224,7 @@ async function performChatCompletion(
   let response;
   try {
     logger.info(
-      `Sending request to Perplexity API with ${messages.length} messages`
+      `Sending request to Perplexity API with ${messages.length} messages using model ${model}`
     );
     response = await fetch(url.toString(), {
       method: "POST",
@@ -264,10 +306,10 @@ const server = new Server(
 
 /**
  * Registers a handler for listing available tools.
- * When the client requests a list of tools, this handler returns the Perplexity Ask Tool.
+ * When the client requests a list of tools, this handler returns the available Perplexity tools.
  */
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
-  tools: [PERPLEXITY_ASK_TOOL],
+  tools: [PERPLEXITY_ASK_TOOL, PERPLEXITY_REASON_TOOL],
 }));
 
 /**
@@ -300,6 +342,26 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         // Invoke the chat completion function with the provided messages
         const messages = args.messages;
         const result = await performChatCompletion(messages);
+        return {
+          content: [{ type: "text", text: result }],
+          isError: false,
+        };
+      }
+      case "perplexity_reason": {
+        if (!Array.isArray(args.messages)) {
+          logger.error(
+            "Invalid arguments for perplexity_reason: 'messages' must be an array"
+          );
+          throw new Error(
+            "Invalid arguments for perplexity_reason: 'messages' must be an array"
+          );
+        }
+        logger.info(
+          `Processing perplexity_reason tool call with ${args.messages.length} messages`
+        );
+        // Invoke the chat completion function with the provided messages using the reasoning model
+        const messages = args.messages;
+        const result = await performChatCompletion(messages, PERPLEXITY_REASONING_MODEL);
         return {
           content: [{ type: "text", text: result }],
           isError: false,
