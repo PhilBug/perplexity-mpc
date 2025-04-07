@@ -11,7 +11,7 @@ from typing import List, Dict, Optional
 import httpx
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool
+from mcp.types import Tool, CallToolResult, TextContent
 from mcp.server.models import InitializationOptions
 
 
@@ -309,14 +309,10 @@ async def setup_server():
                 )
                 messages = arguments["messages"]
                 result = await perform_chat_completion(messages)
-                return {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": result
-                        }
-                    ]
-                }
+                return CallToolResult(
+                    content=[TextContent(type="text", text=result, annotations=None)],
+                    isError=False
+                )
 
             elif name == "perplexity_reason":
                 if not isinstance(arguments.get("messages"), list):
@@ -335,36 +331,26 @@ async def setup_server():
                     "PERPLEXITY_REASONING_MODEL", "sonar-reasoning-pro"
                 )
                 result = await perform_chat_completion(messages, reasoning_model)
-                return {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": result
-                        }
-                    ]
-                }
+                return CallToolResult(
+                    content=[TextContent(type="text", text=result, annotations=None)],
+                    isError=False
+                )
 
             else:
                 await FileRotatingLogger.error(f"Unknown tool requested: {name}")
-                return {
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": f"Unknown tool: {name}"
-                        }
-                    ]
-                }
+                error_text = f"Unknown tool: {name}"
+                return CallToolResult(
+                    content=[TextContent(type="text", text=error_text, annotations=None)],
+                    isError=True
+                )
 
         except Exception as e:
             await FileRotatingLogger.error("Error processing tool call", e)
-            return {
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"Error: {str(e)}"
-                    }
-                ]
-            }
+            error_text = f"Error: {str(e)}"
+            return CallToolResult(
+                content=[TextContent(type="text", text=error_text, annotations=None)],
+                isError=True
+            )
 
     return server
 

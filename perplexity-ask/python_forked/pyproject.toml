@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "perplexity-mcp"
+dynamic = ["version"]
+authors = [
+    { name = "Jason Allen" },
+]
+description = "MCP integration for Perplexity AI web searches"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "aiohttp>=3.8.0",
+    "pydantic>=2.0.0",
+    "mcp>=1.0.2",
+]
+
+[project.scripts]
+perplexity-mcp = "perplexity_mcp:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/perplexity_mcp"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.version]
+path = "src/perplexity_mcp/__init__.py"
